@@ -4,23 +4,32 @@
 #include <vector>
 #include <sstream>
 
-bool CorrectOrder(const std::vector<int> update, const std::vector<std::pair<int,int>>& pages_rules) {
-  bool found = false;
+bool IncorrectOrder(const std::vector<int> update, const std::vector<std::pair<int,int>>& pages_rules) {
   for (int i = 0; i < update.size(); i++) {
     for (int j = i + 1; j < update.size(); j++) {
       for (int k = 0; k < pages_rules.size(); k++) {
         if (pages_rules[k] == std::pair<int,int>(update[j], update[i])) {
-          return false;
-        } else if (pages_rules[k] == std::pair<int,int>(update[i], update[j])) {
-          found = true;
+          return true;
         }
       }
     }
-    if(!found) {
-      return false;
+  }
+  return false;
+}
+
+void FixingOrder(std::vector<int>& update, const std::vector<std::pair<int,int>>& pages_rules) {
+  int aux;
+  for (int i = 0; i < update.size(); i++) {
+    for (int j = i + 1; j < update.size(); j++) {
+      for (int k = 0; k < pages_rules.size(); k++) {
+        if (pages_rules[k] == std::pair<int,int>(update[j], update[i])) {
+          aux = update[j];
+          update[j] = update[i];
+          update[i] = aux;
+        }
+      }
     }
   }
-  return true;
 }
 
 int main() {
@@ -31,6 +40,7 @@ int main() {
   std::vector<int> update;
   std::ifstream input_file;
   std::istringstream update_input;
+  bool found;
   input_file.open("input.txt", std::ios_base::in);
   getline(input_file, line);
   while (!line.empty()) {
@@ -44,8 +54,13 @@ int main() {
     while(getline(update_input, page_string, ',')) {
       update.push_back(std::stoi(page_string));
     }
-    if (CorrectOrder(update, pages_rules)) {
-      //std::cout << update[update.size()/2] << std::endl;
+    found = false;
+    while(IncorrectOrder(update, pages_rules)) {
+      found = true;
+      FixingOrder(update, pages_rules);
+    }
+    if (found) {
+      std::cout << update[update.size()/2] << std::endl;
       result += update[update.size()/2];
     }
     update.clear();
